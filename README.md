@@ -9,7 +9,7 @@
 * [Python 3.12](https://www.python.org/)
 * [Flask](https://flask.palletsprojects.com/)
 * [SQLAlchemy](https://www.sqlalchemy.org/)
-* \[SQLite (banco de dados)]
+* [SQLite (banco de dados)]
 * [Flask-CORS](https://flask-cors.readthedocs.io/)
 * [Pytest](https://docs.pytest.org/)
 
