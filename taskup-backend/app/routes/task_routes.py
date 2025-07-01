@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, abort
 from app.models.task import Task
 from app.extensions import db
+from  app.models.gamefication import Gamefication  
 
 
 task_bp = Blueprint("tasks", __name__)
@@ -50,6 +51,8 @@ def update_task(task_id):
     
     if not data:
         return jsonify({"error": "No data provided"}), 400
+    
+    was_completed = task.completed  #status anterior
 
     if "title" in data:
         task.title = data["title"]
@@ -59,6 +62,17 @@ def update_task(task_id):
         task.completed = data["completed"]
     
     db.session.commit()    
+    
+    if not was_completed and task.completed:
+        gamefication = Gamefication.query.first()
+        if not gamification:
+            gamefication = Gamefication()
+            db.session.add(gamefication)
+        gamefication.task_completed += 1
+        gamefication.points +=10
+        gamification.level = 1 + gamefication.points // 100
+        gamefication.last_update = datetime.utcnow()
+        db.session.commit()
     return jsonify(task.to_dict()), 200
 
 @task_bp.route("/<int:task_id>", methods=["DELETE"])
@@ -68,3 +82,18 @@ def delete_task(task_id):
     db.session.delete(task)
     db.session.commit()
     return jsonify({"message": "Task deleted successfully"}), 200
+
+@task_bp.route("/gamefication", methods=["GET"])
+def get_gamefication():
+    """Get the gamefication status."""
+    gamefication = Gamefication.query.first()
+    if not gamefication:
+        return jsonify({
+             "points": 0,
+            "level": 1,
+            "tasks_completed": 0
+            }), 200
+    return jsonify(
+        {"points": gamefication.points,
+        "level": gamefication.level,
+        "tasks_completed": gamefication.tasks_completed}), 200
